@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Mail, Mic, Video } from "lucide-react";
+import { Github, Mail, Mic } from "lucide-react";
 import { Container, Reveal } from "./primitives";
 
 const LINKS: {
@@ -18,8 +18,12 @@ const LINKS: {
     href: "https://github.com/Ruonan411/shengkongchang-agent",
     external: true,
   },
-  { icon: Video, label: "完整录屏", value: "【录屏链接】", href: "#" },
-  { icon: Mail, label: "联系交流", value: "【邮箱 / 微信】", href: "#" },
+  {
+    icon: Mail,
+    label: "联系交流",
+    value: "ruonan_chen111@163.com",
+    href: "mailto:ruonan_chen111@163.com",
+  },
 ];
 
 export function CTA() {
@@ -40,7 +44,7 @@ export function CTA() {
         </Reveal>
 
         <Reveal delay={0.08}>
-          <div className="mx-auto mt-12 grid max-w-3xl gap-4 sm:grid-cols-2">
+          <div className="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-3">
             {LINKS.map((l) => (
               <a
                 key={l.label}
