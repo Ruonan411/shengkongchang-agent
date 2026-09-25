@@ -1,0 +1,29 @@
+{
+  "name": "boan-copilot-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "node -e \"const fs=require('fs');if(!fs.existsSync('out/index.html')){console.error('ERROR: out/index.html not found — run `next build` locally first');process.exit(1)}console.log('static export present, skipping build')\"",
+    "start": "node server.js",
+    "export": "next build",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@tencent-ai/workbuddy-cloud-sdk": "^0.1.2-dev.1b37f73.202609222026",
+    "framer-motion": "^11.3.8",
+    "lucide-react": "^0.408.0",
+    "next": "14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.6",
+    "typescript": "^5.5.3"
+  }
+}
