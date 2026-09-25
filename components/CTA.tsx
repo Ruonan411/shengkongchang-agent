@@ -3,9 +3,21 @@
 import { Github, Mail, Mic, Video } from "lucide-react";
 import { Container, Reveal } from "./primitives";
 
-const LINKS = [
-  { icon: Mic, label: "语音 Demo", value: "【Demo 链接】", href: "#demo" },
-  { icon: Github, label: "源代码", value: "【GitHub 链接】", href: "#" },
+const LINKS: {
+  icon: typeof Mic;
+  label: string;
+  value: string;
+  href: string;
+  external?: boolean;
+}[] = [
+  { icon: Mic, label: "语音 Demo", value: "在线实操 · 开麦即试", href: "#demo" },
+  {
+    icon: Github,
+    label: "源代码",
+    value: "Ruonan411/shengkongchang-agent",
+    href: "https://github.com/Ruonan411/shengkongchang-agent",
+    external: true,
+  },
   { icon: Video, label: "完整录屏", value: "【录屏链接】", href: "#" },
   { icon: Mail, label: "联系交流", value: "【邮箱 / 微信】", href: "#" },
 ];
@@ -33,6 +45,8 @@ export function CTA() {
               <a
                 key={l.label}
                 href={l.href}
+                target={l.external ? "_blank" : undefined}
+                rel={l.external ? "noopener noreferrer" : undefined}
                 className="group flex items-center gap-3 rounded-card border border-dark-border bg-dark-card p-4 transition-colors hover:border-accent-cyan/40"
               >
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-blue/15 text-accent-cyan">
