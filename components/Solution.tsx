@@ -14,7 +14,8 @@ import {
   Hourglass,
   Zap,
 } from "lucide-react";
-import { Reveal, Section, SectionHeading, Placeholder } from "./primitives";
+import { Reveal, Section, SectionHeading } from "./primitives";
+import { WorkbenchMockup } from "./WorkbenchMockup";
 
 /* 设计原则三型 */
 const PRINCIPLES = [
@@ -130,12 +131,7 @@ export function Solution() {
       {/* 功能蓝图 A–G */}
       <Reveal delay={0.08} className="mt-8">
         <div className="relative rounded-card border border-dark-border/10 bg-light-card p-4 shadow-soft sm:p-8">
-          <Placeholder
-            tone="light"
-            ratio="16 / 9"
-            label="此处替换为 Web 悬浮 Agent 工作台截图"
-            note="暗色高对比 · 大字号 · 适配补光灯直射环境 · 占屏 ≈25%"
-          />
+          <WorkbenchMockup />
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {MODULES.map((m) => (
