@@ -203,12 +203,18 @@ function semanticFilter(text: string): { result: "PASS" | "BLOCK"; reason?: stri
 }
 
 function rawDetectActions(text: string): ActionKey[] {
-  const found: ActionKey[] = [];
+  // 多步编排必须按主播话里动作出现的先后顺序，而不是动作类型定义顺序
+  const found: Array<{ action: ActionKey; at: number }> = [];
   (Object.keys(ACTION_KEYWORDS) as ActionKey[]).forEach((k) => {
     if (k === "prepare") return; // 蓄力单独处理
-    if (ACTION_KEYWORDS[k].some((kw) => text.includes(kw))) found.push(k);
+    let at = -1;
+    for (const kw of ACTION_KEYWORDS[k]) {
+      const i = text.indexOf(kw);
+      if (i !== -1 && (at === -1 || i < at)) at = i;
+    }
+    if (at !== -1) found.push({ action: k, at });
   });
-  return found;
+  return found.sort((a, b) => a.at - b.at).map((x) => x.action);
 }
 
 /* 本地规则（降级 Mock）：语义确认 + 槽位抽取。
