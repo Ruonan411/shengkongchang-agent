@@ -124,13 +124,15 @@ const SYSTEM_PROMPT = `你是直播场景下的动作意图理解 Agent。你的
 用户自填口令（keyword → action）：
 __COMMANDS__
 
+硬性安全约束：只有上面列出的口令 / 动作类型才允许触发。如果说话内容涉及未配置的动作（例如没有配置优惠券口令，主播却说"发个优惠券"），一律 action="NONE"、semantic_filter="BLOCK"，reason 写明"口令未配置，未触发"。
+
 约束：
 - 否定句（“今天不发福袋了”）、假设 / 条件句（“如果在线到一千人就发福袋”）、举例 / 回顾句（“上次有个主播说发福袋”）：action="NONE"，semantic_filter="BLOCK"；
 - 蓄力动作（“准备开价”“准备上链接”等憋单表达）：action="prepare"，action_type="PREPARE"；
 - 模棱两可（“整点福利”“来点东西”“送点福利”等福利类模糊表达）：action_type="AMBIGUOUS"，candidates 给出 2–4 个候选 action（从 fudai / coupon / redpacket / lottery 中选）；
 - 多步指令（含“先…再…然后…接着…最后”等顺序词且包含 ≥2 个动作）：action_type="EXECUTE"，actions 给出有序动作数组；
 - 明确指令：action_type="EXECUTE"，semantic_filter="PASS"，confidence ≥ 0.9；
-- action 只能取以下枚举之一：fudai(发福袋) / explain(弹讲解卡) / list(上架商品) / modify(改价开价) / prepare(准备开价) / coupon(优惠券) / redpacket(红包) / lottery(抽奖) / NONE。
+- action 只能取「用户自填口令」映射中出现过的 action 之一，或 NONE；candidates（模棱两可候选）同样只能从已配置动作中选择，绝不可输出未配置的动作。
 
 输出严格 JSON，字段如下：
 {
@@ -192,6 +194,10 @@ export async function parseIntentViaLLM(
     const parsed = JSON.parse(answer) as Record<string, unknown>;
     const action = validKey(parsed.action);
 
+    // 硬闸：只放行「口令配置」中出现过的动作。模型幻觉输出未配置动作时，
+    // 一律降级 null，由调用方走本地规则（本地同样只认已配置口令）。
+    const allowed = new Set(commands.map((c) => c.action));
+
     // 拦截 / 无动作
     if (parsed.semantic_filter === "BLOCK" || parsed.action === "NONE" || !action) {
       if (parsed.semantic_filter === "BLOCK" || parsed.action === "NONE") {
@@ -233,7 +239,7 @@ export async function parseIntentViaLLM(
     if (actionType === "EXECUTE" && Array.isArray(parsed.actions)) {
       const multi = (parsed.actions as unknown[])
         .map(validKey)
-        .filter((x): x is ActionKey => x !== null);
+        .filter((x): x is ActionKey => x !== null && allowed.has(x));
       if (multi.length >= 2) {
         return {
           uid: uid(),
@@ -251,13 +257,14 @@ export async function parseIntentViaLLM(
       }
     }
 
-    // 模棱两可候选
+    // 模棱两可候选兜底（旧行为会硬编码全量福利列表，现已收紧为已配置动作）
     if (ambiguity) {
       const candidates = Array.isArray(parsed.candidates)
         ? (parsed.candidates as unknown[])
             .map(validKey)
-            .filter((x): x is ActionKey => x !== null)
+            .filter((x): x is ActionKey => x !== null && allowed.has(x))
         : [];
+      if (!candidates.length) return null; // 候选里没有已配置动作 → 降级本地
       return {
         uid: uid(),
         keyword: text.slice(0, 12),
@@ -268,15 +275,13 @@ export async function parseIntentViaLLM(
         confidence,
         slots,
         highRisk: false,
-        candidates:
-          candidates.length >= 2
-            ? candidates
-            : ["fudai", "coupon", "redpacket", "lottery"],
+        candidates: candidates,
         note: "福利类模糊意图：弹出候选，主播选择后执行",
       };
     }
 
-    // 单步执行 / 蓄力
+    // 单步执行 / 蓄力（未配置动作在此拦截）
+    if (!allowed.has(action)) return null;
     return {
       uid: uid(),
       keyword: text.slice(0, 12),

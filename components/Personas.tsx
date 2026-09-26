@@ -6,27 +6,29 @@ import { Reveal, Section, SectionHeading } from "./primitives";
 const PERSONAS = [
   {
     name: "小李",
-    role: "女装 / 美妆 新手主播",
+    role: "女装 / 美妆 个人主播（一人开播）",
     icon: User,
     accent: "text-accent-cyan",
     traits: [
-      "单人中播，口播和后台操作都要自己来，手忙脚乱",
+      "直播间只有她自己：没有中控、没有助播，讲品、上链接、发福袋全靠自己",
       "发福袋、弹讲解卡这类高频动作，一忙就忘、一断就掉转化",
       "不想为了点鼠标而中断口播节奏",
     ],
     need: "口令即动作，动口不动手，把双手从鼠标里解放出来。",
+    scene: "口播进行中，顺嘴一句「上福利」，福袋自动发放——不用腾手点后台。",
   },
   {
     name: "王哥",
-    role: "中小白牌商家老板兼场控",
+    role: "中小白牌商家老板，自己兼场控",
     icon: ShieldAlert,
     accent: "text-danger",
     traits: [
-      "卖防晒护肤类目，最怕忘了发福利、漏了上架",
-      "单人中播，节奏一断、流量就浪费",
+      "没有专职中控：老板一边盯生意一边盯直播，后台操作常常没人接",
+      "最怕喊了福利没人跟：主播喊「发张优惠券」，后台还在忙别的，观众催半天券没发出去",
       "不想为标准化运营再加一个人手",
     ],
     need: "用语音稳定触发平台原生动作，不漏动作、不抢戏。",
+    scene: "主播喊「发张优惠券」，语音直接触发发放——不等中控、不漏动作。",
   },
 ];
 
@@ -37,7 +39,7 @@ export function Personas() {
         <SectionHeading
           index="03"
           title="目标用户画像"
-          subtitle="两类高频人群，共同痛点：单人中播、手不够用、动作易漏。"
+          subtitle="两类高频人群，共同痛点：没有专职中控、主播既要讲又要操作、动作容易漏。"
         />
       </Reveal>
 
@@ -77,12 +79,13 @@ export function Personas() {
                 </p>
               </div>
 
-              {p.name === "小李" && (
-                <div className="mt-4 flex items-center gap-2 text-[13px] text-muted-light">
-                  <Mic className="h-4 w-4" />
-                  典型场景：口播中进行中，顺嘴一句「上福利」即发福袋
-                </div>
-              )}
+              <div className="mt-auto flex items-start gap-2 pt-5 text-[13px] leading-[1.55] text-muted-light">
+                <Mic className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>
+                  <span className="font-medium text-light-text">典型场景：</span>
+                  {p.scene}
+                </span>
+              </div>
             </div>
           </Reveal>
         ))}

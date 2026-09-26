@@ -142,7 +142,7 @@ export function LiveRoomShowcase() {
           <SectionHeading
             index="02"
             title="产品实拍：主播说一句，直播间自动动一步"
-            subtitle="下面是一个真实直播间里主播看到的画面——没有置信度、没有槽位、没有状态机，只有「发生了什么」。点开就自动演示，无需麦克风。"
+            subtitle="右侧就是主播视角的直播间。点击「播放演示」，看主播怎么用一句话完成发福袋、挂讲解卡、开价——全程不用碰鼠标，也无需开麦克风。"
           />
 
           <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -165,9 +165,9 @@ export function LiveRoomShowcase() {
 
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
             {[
-              { k: "福袋", v: "发放中 03:00", d: "高置信直接发，不弹框" },
-              { k: "商品", v: "讲解中", d: "弹讲解卡自动挂上" },
-              { k: "价格", v: "??? → ¥99", d: "蓄力后自动开价" },
+              { k: "福袋", v: "发放中 03:00", d: "说一句，福袋自动发放" },
+              { k: "商品", v: "讲解中", d: "讲解卡自动挂上链接" },
+              { k: "价格", v: "??? → ¥99", d: "开价自动跟上，不冷场" },
             ].map((x) => (
               <div
                 key={x.k}

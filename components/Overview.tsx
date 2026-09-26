@@ -8,7 +8,7 @@ const ITEMS = [
     icon: UserRound,
     k: "我的角色",
     v: "独立产品负责人 & AI 协同开发者",
-    d: "从商家访谈、定义痛点，到语音 Agent 设计与前端落地，独立闭环。",
+    d: "从亲手体验直播中控、定义执行痛点，到语音 Agent 设计与前端落地，独立完成。",
   },
   {
     icon: Rocket,
@@ -25,7 +25,7 @@ const ITEMS = [
   {
     icon: Activity,
     k: "核心价值",
-    v: "口令即动作 · 减负单人中播",
+    v: "口令即动作 · 主播动口不动手",
     d: "AI 把口播转成平台原生互动，替主播动手、不替主播说话。",
   },
 ];
@@ -37,7 +37,7 @@ export function Overview() {
         <SectionHeading
           index="01"
           title="项目概览"
-          subtitle="一个由一线商家访谈驱动、4 天跑通 MVP 的 AI 语音动作触发 Agent。"
+          subtitle="一个从真实中控上手体验出发、4 天跑通 MVP 的 AI 语音动作触发 Agent。"
         />
       </Reveal>
 

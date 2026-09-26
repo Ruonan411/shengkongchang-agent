@@ -5,7 +5,7 @@ import { Reveal, Section, SectionHeading } from "./primitives";
 const STEPS = [
   { day: "Day 1", title: "痛点 + 映射", desc: "梳理用户痛点，设计意图—动作映射与蓄力动作延迟策略，用 v0 生成核心界面。" },
   { day: "Day 2", title: "ASR + 意图引擎", desc: "接入流式 ASR 与热词增强，编写意图理解 Prompt，落地语义过滤与规则快速召回。" },
-  { day: "Day 3", title: "执行闭环", desc: "高置信直接执行、模棱两可弹候选、蓄力动作延迟策略、Function Calling 与平台适配层、Mock 接口。" },
+  { day: "Day 3", title: "执行闭环", desc: "明确口令直接执行、模棱两可弹候选、蓄力动作延迟策略、Function Calling 与平台适配层、Mock 接口。" },
   { day: "Day 4", title: "部署", desc: "Cursor 编码 + Vercel 部署，上线进入主播试用与反馈收集。" },
   { day: "内测", title: "找 10+ 主播验证", desc: "重点看 ASR 是否听准、否定/假设句是否过滤、候选排序、蓄力策略是否合习惯、发福袋是否够快、是否破坏节奏。" },
 ];

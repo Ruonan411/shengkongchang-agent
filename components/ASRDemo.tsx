@@ -195,7 +195,7 @@ function semanticFilter(text: string): { result: "PASS" | "BLOCK"; reason?: stri
   return { result: "PASS" };
 }
 
-function detectActions(text: string): ActionKey[] {
+function rawDetectActions(text: string): ActionKey[] {
   const found: ActionKey[] = [];
   (Object.keys(ACTION_KEYWORDS) as ActionKey[]).forEach((k) => {
     if (k === "prepare") return; // 蓄力单独处理
@@ -204,10 +204,13 @@ function detectActions(text: string): ActionKey[] {
   return found;
 }
 
-/* Mock LLM：语义确认 + 槽位抽取（沙盒演示，非真实模型调用） */
+/* 本地规则（降级 Mock）：语义确认 + 槽位抽取。
+   核心安全约束：只有「口令配置」中配置过的动作类型才可触发；
+   听起来像指令但未配置 → 明确拦截提示，绝不执行。 */
 function runParse(text: string, commands: Command[]): Intent | null {
   const filter = semanticFilter(text);
   const uid = `i-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  const configured = new Set(commands.map((c) => c.action));
 
   if (filter.result === "BLOCK") {
     return {
@@ -217,8 +220,26 @@ function runParse(text: string, commands: Command[]): Intent | null {
     };
   }
 
-  // 蓄力动作
-  if (ACTION_KEYWORDS.prepare.some((kw) => text.includes(kw))) {
+  // 未配置口令拦截：识别到动作语义，但该动作不在口令配置中 → 不执行
+  const raw = rawDetectActions(text);
+  const prepareWanted = ACTION_KEYWORDS.prepare.some((kw) => text.includes(kw));
+  const matchedConfigured = raw.filter((a) => configured.has(a));
+  if (
+    matchedConfigured.length === 0 &&
+    !(prepareWanted && configured.has("prepare")) &&
+    (raw.length > 0 || prepareWanted)
+  ) {
+    const missing: ActionKey = prepareWanted && !configured.has("prepare") ? "prepare" : raw[0];
+    return {
+      uid, keyword: ACTION_META[missing].label, action: missing, actionType: "NONE",
+      semanticFilter: "BLOCK", filterReason: "口令未配置",
+      ambiguity: false, confidence: 0.99, slots: [], highRisk: false,
+      note: "该动作未在左侧「口令配置」中设置，不会触发；添加口令后即可语音启用",
+    };
+  }
+
+  // 蓄力动作（仅当 prepare 已配置）
+  if (configured.has("prepare") && prepareWanted) {
     const price = parseAmount(text);
     const slots: Slot[] = [];
     if (price != null) slots.push({ key: "price", label: "开价", value: `¥${price}` });
@@ -229,9 +250,9 @@ function runParse(text: string, commands: Command[]): Intent | null {
     };
   }
 
-  // 多步编排
+  // 多步编排（动作全部来自已配置口令）
   const seq = SEQUENCE_WORDS.some((w) => text.includes(w));
-  const actions = detectActions(text);
+  const actions = matchedConfigured;
   if (seq && actions.length >= 2) {
     return {
       uid, keyword: "多步指令", action: actions[0], actionType: "EXECUTE",
@@ -240,17 +261,19 @@ function runParse(text: string, commands: Command[]): Intent | null {
     };
   }
 
-  // 模棱两可
+  // 模棱两可（候选仅限已配置动作）
   if (AMBIGUITY_TRIGGERS.some((t) => text.includes(t)) && actions.length === 0) {
+    const candidates = (["fudai", "coupon", "redpacket", "lottery"] as ActionKey[]).filter((a) => configured.has(a));
+    if (!candidates.length) return null;
     return {
       uid, keyword: text.slice(0, 12), action: "fudai", actionType: "AMBIGUOUS",
       semanticFilter: "PASS", ambiguity: true, confidence: 0.72, slots: [],
-      highRisk: false, candidates: ["fudai", "coupon", "redpacket", "lottery"],
+      highRisk: false, candidates,
       note: "福利类模糊意图：弹出候选，主播选择后执行",
     };
   }
 
-  // 特定动作（用户口令优先）
+  // 特定动作（用户口令优先；同义词仅在动作已配置时生效）
   let best: { action: ActionKey; kw: string } | null = null;
   for (const c of commands) {
     if (c.keyword.trim() && text.includes(c.keyword.trim())) { best = { action: c.action, kw: c.keyword }; break; }
@@ -288,7 +311,7 @@ function runParse(text: string, commands: Command[]): Intent | null {
   };
 }
 
-/* 业务流转 6 场景预设 */
+/* 业务流转 8 场景预设 */
 const SCENARIOS = [
   { type: "EXECUTE", label: "明确指令", text: "给大家发个福袋，倒计时 3 分钟" },
   { type: "BLOCK", label: "否定句", text: "今天不发福袋了" },
@@ -296,6 +319,8 @@ const SCENARIOS = [
   { type: "AMBIGUOUS", label: "模棱两可", text: "给家人们整点福利" },
   { type: "PREPARE", label: "蓄力动作", text: "准备开价" },
   { type: "MULTI", label: "多步编排", text: "先弹讲解卡，再发福袋，然后开价" },
+  { type: "HIGH_RISK", label: "高危确认", text: "上架 1 号链接" },
+  { type: "NONE", label: "未配置口令", text: "发个优惠券" },
 ];
 
 const STATE_GLOSS: Record<DemoState, string> = {
@@ -397,7 +422,7 @@ export function ASRDemo() {
         if (!intent) intent = runParse(text, commands);
         if (!intent) {
           setState("FAILED");
-          pushLog("err", "未识别到已知意图，已忽略");
+          pushLog("err", "未匹配到已配置口令，已忽略 —— 只有左侧「口令配置」中的口令可触发");
           return;
         }
         pushLog("info", `意图解析引擎：${engine}`);
@@ -584,7 +609,7 @@ export function ASRDemo() {
           实时演示 · 说一句口令，Agent 自动动一步
         </div>
         <div className="hidden text-[11px] text-muted-light/60 sm:block">
-          口令由你自填 · 意图解析优先调用真实大模型，失败自动降级本地规则
+          仅已配置口令可触发 · 意图解析优先调用真实大模型，失败自动降级本地规则
         </div>
       </div>
 
@@ -613,7 +638,7 @@ export function ASRDemo() {
               <div className="text-[13px] font-semibold text-light-text">A · 口令配置</div>
               <span className="font-mono text-[11px] text-muted-light/60">口令 → 平台原生动作</span>
             </div>
-            <p className="mt-1 text-[12px] leading-[1.5] text-muted-light">主播口播中说出任意口令，Agent 即识别意图、抽取槽位、预备对应动作。可自由增删改。</p>
+            <p className="mt-1 text-[12px] leading-[1.5] text-muted-light">只有这里配置过的口令才能触发对应动作；未配置的口播内容会被安全忽略。可自由增删改。</p>
             <div className="mt-3 space-y-2">
               {commands.map((cmd) => (
                 <div key={cmd.id} className="flex items-center gap-2">
@@ -632,8 +657,8 @@ export function ASRDemo() {
           </div>
 
           <div className="rounded-xl border border-dark-border/10 bg-light-bg p-4">
-            <div className="text-[13px] font-semibold text-light-text">业务流转 · 6 场景预设</div>
-            <p className="mt-1 text-[12px] leading-[1.5] text-muted-light">一键体验：明确指令 / 否定句 / 条件句 / 模棱两可 / 蓄力动作 / 多步编排。</p>
+            <div className="text-[13px] font-semibold text-light-text">业务流转 · 8 场景预设</div>
+            <p className="mt-1 text-[12px] leading-[1.5] text-muted-light">一键体验：明确指令 / 否定句 / 条件句 / 模棱两可 / 蓄力动作 / 多步编排 / 高危确认 / 未配置口令。</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
               {SCENARIOS.map((sc) => (
                 <button key={sc.text} onClick={() => onManualSubmit(sc.text)} className="rounded-lg border border-dark-border/15 bg-light-card px-2.5 py-2 text-left text-[12px] text-muted-light transition hover:border-accent-cyan/40 hover:text-accent-cyan">

@@ -47,15 +47,15 @@ export function Background() {
           <Placeholder
             tone="light"
             ratio="4 / 3"
-            label="此处替换为中控后台 / 助播操作截图"
-            note="直播中控：口播 → 手动点鼠标的执行缝隙"
+            label="此处放置：抖音中控台后台实操截图（待补充）"
+            note="直播中控：口播 → 手动找入口、填参数、点鼠标的执行缝隙"
           />
           <div className="mt-4 flex gap-3 rounded-card border border-dark-border/10 bg-light-card p-5 shadow-soft">
             <Quote className="h-5 w-5 shrink-0 text-accent-blue" />
             <p className="text-[15px] leading-[1.6] text-muted-light">
               “平台给我一堆建议，可最后点鼠标的还是我自己，手根本点不过来。”
               <span className="mt-1 block text-[13px] text-muted-light/80">
-                —— 受访中小商家主播
+                —— 来自一次真实的中控上手体验
               </span>
             </p>
           </div>
