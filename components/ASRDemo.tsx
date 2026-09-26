@@ -188,6 +188,13 @@ function parseAmount(text: string): number | null {
 function semanticFilter(text: string): { result: "PASS" | "BLOCK"; reason?: string } {
   if (/(不|没|别|勿|不用|不要)(要|用|会|能)?\s*(发|开|上|讲|弹|准备|抽|放|改|降)/.test(text))
     return { result: "BLOCK", reason: "否定句" };
+  // 疑问句：主播在询问状态 / 征求意见，不是下达指令（如“优惠券发了吗？”）
+  if (
+    /(是不是|有没有|了没|了吗|好不好|行不行|能不能|要不要|可以吗|好吗|怎么样了)/.test(text) ||
+    /(吗|嘛|呢)\s*[？?]*\s*$/.test(text) ||
+    /[？?]\s*$/.test(text)
+  )
+    return { result: "BLOCK", reason: "疑问句" };
   if (/(如果|假如|假设|一旦|若|当.{0,10}时|等.{0,10}就)/.test(text))
     return { result: "BLOCK", reason: "假设 / 条件句" };
   if (/(上次|比如|例如|听说|那个主播|有个主播|别人家|之前有个|别人)/.test(text))
@@ -311,10 +318,11 @@ function runParse(text: string, commands: Command[]): Intent | null {
   };
 }
 
-/* 业务流转 8 场景预设 */
+/* 业务流转 9 场景预设 */
 const SCENARIOS = [
   { type: "EXECUTE", label: "明确指令", text: "给大家发个福袋，倒计时 3 分钟" },
   { type: "BLOCK", label: "否定句", text: "今天不发福袋了" },
+  { type: "BLOCK", label: "疑问句", text: "优惠券发了吗？" },
   { type: "BLOCK", label: "条件句", text: "如果在线到一千人，我们就发福袋" },
   { type: "AMBIGUOUS", label: "模棱两可", text: "给家人们整点福利" },
   { type: "PREPARE", label: "蓄力动作", text: "准备开价" },
@@ -657,8 +665,8 @@ export function ASRDemo() {
           </div>
 
           <div className="rounded-xl border border-dark-border/10 bg-light-bg p-4">
-            <div className="text-[13px] font-semibold text-light-text">业务流转 · 8 场景预设</div>
-            <p className="mt-1 text-[12px] leading-[1.5] text-muted-light">一键体验：明确指令 / 否定句 / 条件句 / 模棱两可 / 蓄力动作 / 多步编排 / 高危确认 / 未配置口令。</p>
+            <div className="text-[13px] font-semibold text-light-text">业务流转 · 9 场景预设</div>
+            <p className="mt-1 text-[12px] leading-[1.5] text-muted-light">一键体验：明确指令 / 否定句 / 疑问句 / 条件句 / 模棱两可 / 蓄力动作 / 多步编排 / 高危确认 / 未配置口令。</p>
             <div className="mt-3 grid grid-cols-2 gap-2">
               {SCENARIOS.map((sc) => (
                 <button key={sc.text} onClick={() => onManualSubmit(sc.text)} className="rounded-lg border border-dark-border/15 bg-light-card px-2.5 py-2 text-left text-[12px] text-muted-light transition hover:border-accent-cyan/40 hover:text-accent-cyan">

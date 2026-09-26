@@ -127,7 +127,7 @@ __COMMANDS__
 硬性安全约束：只有上面列出的口令 / 动作类型才允许触发。如果说话内容涉及未配置的动作（例如没有配置优惠券口令，主播却说"发个优惠券"），一律 action="NONE"、semantic_filter="BLOCK"，reason 写明"口令未配置，未触发"。
 
 约束：
-- 否定句（“今天不发福袋了”）、假设 / 条件句（“如果在线到一千人就发福袋”）、举例 / 回顾句（“上次有个主播说发福袋”）：action="NONE"，semantic_filter="BLOCK"；
+- 否定句（“今天不发福袋了”）、疑问句（“优惠券发了吗？”“要不要上个链接？”——询问状态或征求意见，不是下达指令）、假设 / 条件句（“如果在线到一千人就发福袋”）、举例 / 回顾句（“上次有个主播说发福袋”）：action="NONE"，semantic_filter="BLOCK"；
 - 蓄力动作（“准备开价”“准备上链接”等憋单表达）：action="prepare"，action_type="PREPARE"；
 - 模棱两可（“整点福利”“来点东西”“送点福利”等福利类模糊表达）：action_type="AMBIGUOUS"，candidates 给出 2–4 个候选 action（从 fudai / coupon / redpacket / lottery 中选）；
 - 多步指令（含“先…再…然后…接着…最后”等顺序词且包含 ≥2 个动作）：action_type="EXECUTE"，actions 给出有序动作数组；
