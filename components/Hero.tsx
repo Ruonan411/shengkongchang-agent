@@ -142,7 +142,7 @@ export function Hero() {
           className="mt-16 grid grid-cols-2 gap-4 lg:grid-cols-4"
         >
           <DataCard tone="dark" value="≤1s" label="口令响应延迟" hint="本地意图解析" />
-          <DataCard tone="dark" value="A–F" label="六大功能模块" hint="配置→识别→执行" />
+          <DataCard tone="dark" value="A–G" label="七大功能模块" hint="配置→识别→执行→评测" />
           <DataCard tone="dark" value="0" label="替主播说话" hint="只动手，不抢戏" />
           <DataCard tone="dark" value="3+" label="覆盖平台" hint="抖音 / 快手 / 视频号" />
         </motion.div>
