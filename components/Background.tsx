@@ -1,7 +1,7 @@
 "use client";
 
 import { Quote } from "lucide-react";
-import { Reveal, Section, SectionHeading, Placeholder } from "./primitives";
+import { Reveal, Section, SectionHeading } from "./primitives";
 
 export function Background() {
   return (
@@ -44,12 +44,18 @@ export function Background() {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <Placeholder
-            tone="light"
-            ratio="4 / 3"
-            label="此处放置：抖音中控台后台实操截图（待补充）"
-            note="直播中控：口播 → 手动找入口、填参数、点鼠标的执行缝隙"
-          />
+          <figure className="overflow-hidden rounded-card border border-dark-border/10 bg-light-card shadow-soft">
+            {/* 真实中控台截图：抖音电商·百应 营销工具-超级福袋 */}
+            <img
+              src="/console-fudai.png"
+              alt="抖音电商·百应中控台：营销工具-超级福袋操作后台"
+              className="block w-full"
+              loading="lazy"
+            />
+            <figcaption className="border-t border-dark-border/10 px-4 py-3 text-[12px] leading-[1.5] text-muted-light">
+              抖音电商·百应中控台实操：主播喊一声“发福袋”，后台要在活动管理里找到入口、确认商品、再点「开始活动」——这就是被声控场闭合的执行缝隙。
+            </figcaption>
+          </figure>
           <div className="mt-4 flex gap-3 rounded-card border border-dark-border/10 bg-light-card p-5 shadow-soft">
             <Quote className="h-5 w-5 shrink-0 text-accent-blue" />
             <p className="text-[15px] leading-[1.6] text-muted-light">
